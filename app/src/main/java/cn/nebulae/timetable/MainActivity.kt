@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
@@ -65,7 +66,7 @@ private val Brand = Color(0xFFD71935)
 private val Ink = Color(0xFF23262B)
 private val Paper = Color(0xFFF5F6F8)
 private val TabLabels = listOf("首页", "首末班", "到站提醒")
-private val TabIcons = listOf("⌂", "◷", "◎")
+private val TabIcons = listOf(R.drawable.ic_tab_home, R.drawable.ic_tab_schedule, R.drawable.ic_tab_arrivals)
 
 class MainActivity : ComponentActivity() {
     private var web: WebView? = null
@@ -174,10 +175,10 @@ class MainActivity : ComponentActivity() {
                         ) {
                             TabLabels.forEachIndexed { index, label ->
                                 LiquidBottomTab(onClick = { runPageScript("androidTab($index)") }) {
-                                    BasicText(
-                                        TabIcons[index],
-                                        modifier = Modifier.clearAndSetSemantics {},
-                                        style = TextStyle(color = Ink, fontSize = 22.sp, textAlign = TextAlign.Center)
+                                    Image(
+                                        painter = painterResource(TabIcons[index]),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(23.dp)
                                     )
                                     RailText(label, Ink, 11)
                                 }
