@@ -27,4 +27,4 @@
 
 ## 第三方代码
 
-Backdrop 依赖固定为 2.0.1。玻璃组件及手势工具来自 Kyant0/AndroidLiquidGlass 提交 eb4a0ea2e17542ea28c2e71088f7dd9acf77aad5，保留演示的光学与交互数值。LiquidButton 增加可设置的内边距参数。Coroutines.kt 使用安卓 awaitFrame 的显式别名。上游许可证见 THIRD-PARTY-LICENSE。
+Backdrop 依赖固定为 2.0.1。玻璃组件及手势工具来自 Kyant0/AndroidLiquidGlass 提交 eb4a0ea2e17542ea28c2e71088f7dd9acf77aad5，保留演示的光学与交互数值。LiquidButton 增加可设置的内边距参数。LiquidBottomTabs 增加容器高度参数，应用中采用 56 dp 高、最大 360 dp 宽。Coroutines.kt 使用安卓 awaitFrame 的显式别名。上游许可证见 THIRD-PARTY-LICENSE。

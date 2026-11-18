@@ -29,6 +29,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -125,7 +126,7 @@ private fun RailApp(model: RailViewModel = viewModel()) {
     LaunchedEffect(model.message) {
         if (model.message != null) { delay(3500); model.dismissMessage() }
     }
-    Box(Modifier.fillMaxSize().background(Paper).windowInsetsPadding(WindowInsets.safeDrawing).imePadding()) {
+    Box(Modifier.fillMaxSize().background(Paper).windowInsetsPadding(WindowInsets.safeDrawing).imePadding().clipToBounds()) {
         Box(Modifier.fillMaxSize().background(Paper).layerBackdrop(controlsBackdrop))
         if (model.loading || model.failure != null) {
             Column(Modifier.align(Alignment.Center).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -140,10 +141,14 @@ private fun RailApp(model: RailViewModel = viewModel()) {
                     if (model.page != "home") {
                         Row(Modifier.fillMaxWidth().background(Color.White).heightIn(min = 64.dp).padding(horizontal = 12.dp),
                             verticalAlignment = Alignment.CenterVertically) {
-                            GlassButton("‹", controlsBackdrop, Modifier.size(44.dp), onClick = model::back)
+                            LiquidButton(model::back, controlsBackdrop, Modifier.size(48.dp),
+                                surfaceColor = Color.White.copy(alpha = .65f),
+                                horizontalContentPadding = 0.dp) {
+                                Image(painterResource(R.drawable.ic_back), "返回上一页", Modifier.size(24.dp))
+                            }
                             Text(when (model.page) { "firstlast" -> "首末班车时刻表"; "choose" -> "请选择站点"; else -> "列车动态" },
                                 19, bold = true, modifier = Modifier.weight(1f), align = TextAlign.Center)
-                            Spacer(Modifier.width(44.dp))
+                            Spacer(Modifier.width(48.dp))
                         }
                     }
                     when (model.page) {
@@ -159,12 +164,13 @@ private fun RailApp(model: RailViewModel = viewModel()) {
                 onTabSelected = { model.navigate(listOf("home", "firstlast", "choose")[it]) },
                 backdrop = backdrop,
                 tabsCount = 3,
-                modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 12.dp, vertical = 8.dp)
-                    .widthIn(max = 516.dp)
+                containerHeight = 56.dp,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp, vertical = 12.dp)
+                    .widthIn(max = 360.dp)
             ) {
                 Labels.forEachIndexed { index, label ->
                     LiquidBottomTab(onClick = { model.navigate(listOf("home", "firstlast", "choose")[index]) }) {
-                        Image(painterResource(Icons[index]), null, Modifier.size(23.dp))
+                        Image(painterResource(Icons[index]), null, Modifier.size(21.dp))
                         Text(label, 11)
                     }
                 }
@@ -226,9 +232,9 @@ private fun Home(model: RailViewModel, backdrop: Backdrop, tablet: Boolean, onIm
         item(span = { GridItemSpan(maxLineSpan) }) {
             Row(Modifier.padding(horizontal = 16.dp, vertical = 18.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 HomeAction("首末班车", "各线路各站首末班时刻", R.drawable.ic_tab_schedule, Brand,
-                    Modifier.weight(1f), backdrop) { model.navigate("firstlast") }
+                    Modifier.weight(1f)) { model.navigate("firstlast") }
                 HomeAction("到站提醒", "查看各方向下两班车", R.drawable.ic_tab_arrivals, Cyan,
-                    Modifier.weight(1f), backdrop) { model.navigate("choose") }
+                    Modifier.weight(1f)) { model.navigate("choose") }
             }
         }
         item(span = { GridItemSpan(maxLineSpan) }) { Text("已接入线路", 17, bold = true, modifier = Modifier.padding(18.dp, 4.dp, 18.dp, 12.dp)) }
@@ -267,9 +273,11 @@ private fun Home(model: RailViewModel, backdrop: Backdrop, tablet: Boolean, onIm
 }
 
 @Composable
-private fun HomeAction(label: String, caption: String, icon: Int, accent: Color, modifier: Modifier, backdrop: Backdrop, onClick: () -> Unit) {
-    LiquidButton(onClick, backdrop, modifier.heightIn(min = 154.dp), surfaceColor = Color.White.copy(alpha = .8f), horizontalContentPadding = 8.dp) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 16.dp)) {
+private fun HomeAction(label: String, caption: String, icon: Int, accent: Color, modifier: Modifier, onClick: () -> Unit) {
+    Box(modifier.clip(RoundedCornerShape(18.dp)).background(Color.White)
+        .clickable(onClick = onClick).heightIn(min = 142.dp).padding(12.dp),
+        contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(painterResource(icon), null, Modifier.size(49.dp).clip(RoundedCornerShape(16.dp))
                 .background(accent.copy(alpha = .12f)).padding(12.dp),
                 colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(accent))
@@ -348,8 +356,9 @@ private fun TimeBadge(label: String, value: String?, color: Color) {
 
 @Composable
 private fun StationPicker(model: RailViewModel, onImport: () -> Unit, tablet: Boolean) {
-    Row(Modifier.fillMaxSize().padding(bottom = 80.dp).background(Color.White)) {
-        LazyColumn(Modifier.width(if (tablet) 160.dp else 110.dp).fillMaxHeight().background(Paper)) {
+    Row(Modifier.fillMaxSize().background(Color.White)) {
+        LazyColumn(Modifier.width(if (tablet) 160.dp else 110.dp).fillMaxHeight().background(Paper),
+            contentPadding = PaddingValues(bottom = 88.dp)) {
             items(model.lines, key = { it.id }) { line ->
                 Box(Modifier.fillMaxWidth().background(if (model.lineId == line.id) Color.White else Paper)
                     .clickable { model.chooseLine(line.id) }.padding(vertical = 23.dp, horizontal = 12.dp)) {
@@ -358,7 +367,7 @@ private fun StationPicker(model: RailViewModel, onImport: () -> Unit, tablet: Bo
             }
             item { Box(Modifier.clickable(onClick = onImport).padding(14.dp)) { Text("＋ 添加线路", 12, Muted) } }
         }
-        LazyColumn(Modifier.weight(1f)) {
+        LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 88.dp)) {
             item { Note("${model.line.name} · 选择车站查看到发情况") }
             items(model.line.stations, key = { it }) { station ->
                 Row(Modifier.fillMaxWidth().clickable { model.chooseStation(station) }.padding(start = 20.dp, end = 12.dp)
